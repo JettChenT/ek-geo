@@ -150,4 +150,4 @@ if __name__ == "__main__":
     )
     interval = Distance(kilometers=0.05)
     sampled = bounds.sample(interval)
-    sampled.plot()
+    print(len(sampled))

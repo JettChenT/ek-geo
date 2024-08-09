@@ -1,2 +1,1 @@
-def hello() -> str:
-    return "Hello from ek-geo!"
+from .datastructs import Point, Coords, Bounds
