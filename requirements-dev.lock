@@ -9,3 +9,9 @@
 #   generate-hashes: false
 
 -e file:.
+attrs==24.2.0
+    # via ek-geo
+geographiclib==2.0
+    # via geopy
+geopy==2.4.1
+    # via ek-geo

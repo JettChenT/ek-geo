@@ -1,13 +1,15 @@
 [project]
 name = "ek-geo"
 version = "0.1.0"
-description = "Add your description here"
-authors = [
-    { name = "Jett Chen", email = "jettchen12345@gmail.com" }
-]
-dependencies = []
+description = "Geographic utilities for EarthKit"
+authors = [{ name = "Jett Chen", email = "jettchen12345@gmail.com" }]
+dependencies = ["attrs>=24.2.0", "geopy>=2.4.1"]
 readme = "README.md"
 requires-python = ">= 3.8"
+license = "MIT"
+
+[project.optional-dependencies]
+graphing = ["pydeck"]
 
 [build-system]
 requires = ["hatchling"]
