@@ -8,7 +8,7 @@ from geopy.distance import Distance
 class Point:
     lon: float = field()
     lat: float = field()
-    aux: dict = field(default={})
+    aux: dict = field(factory=dict)
 
     def __getitem__(self, idx):
         if isinstance(idx, int):

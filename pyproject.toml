@@ -1,6 +1,6 @@
 [project]
 name = "ek-geo"
-version = "0.1.1"
+version = "0.1.2"
 description = "Geographic utilities for EarthKit"
 authors = [{ name = "Jett Chen", email = "jettchen12345@gmail.com" }]
 dependencies = ["attrs>=24.2.0", "geopy>=2.4.1"]
