@@ -1,14 +1,13 @@
-from attr import field, define
-from typing import Any, Tuple, Self, Optional
+from pydantic import BaseModel, Field
+from typing import Any, Tuple, Optional, List
 import geopy.distance
 from geopy.distance import Distance
 
 
-@define
-class Point:
-    lon: float = field()
-    lat: float = field()
-    aux: dict = field(factory=dict)
+class Point(BaseModel):
+    lon: float
+    lat: float
+    aux: dict = Field(default_factory=dict)
 
     def __getitem__(self, idx):
         if isinstance(idx, int):
@@ -19,41 +18,40 @@ class Point:
             elif idx == "lat":
                 return self.lat
             else:
-                return self.aux[idx] if self.aux else None
+                return self.aux.get(idx)
 
-    def lonlat(self):
+    def lonlat(self) -> Tuple[float, float]:
         return (self.lon, self.lat)
 
-    def latlon(self):
+    def latlon(self) -> Tuple[float, float]:
         return (self.lat, self.lon)
 
-    def distance(self, other):
+    def distance(self, other: 'Point') -> Distance:
         return geopy.distance.distance(self.latlon(), other.latlon())
 
     def update_aux(self, **kwargs):
         self.aux.update(kwargs)
 
 
-@define
-class Coords:
-    coords: list[Point] = field(factory=list)
+class Coords(BaseModel):
+    coords: List[Point] = Field(default_factory=list)
 
     def append(self, point: Point):
         self.coords.append(point)
 
-    def get_bounds(self) -> Optional["Bounds"]:
+    def get_bounds(self) -> Optional['Bounds']:
         if not self.coords:
             return None
-        lo = Point(self.coords[0].lon, self.coords[0].lat)
-        hi = Point(self.coords[0].lon, self.coords[0].lat)
+        lo = Point(lon=self.coords[0].lon, lat=self.coords[0].lat)
+        hi = Point(lon=self.coords[0].lon, lat=self.coords[0].lat)
         for point in self.coords:
             lo.lon = min(lo.lon, point.lon)
             lo.lat = min(lo.lat, point.lat)
             hi.lon = max(hi.lon, point.lon)
             hi.lat = max(hi.lat, point.lat)
-        return Bounds(lo, hi)
+        return Bounds(lo=lo, hi=hi)
 
-    def sample(self, bounds: "Bounds", interval: Distance):
+    def sample(self, bounds: 'Bounds', interval: Distance) -> 'Coords':
         sampled_coords = Coords()
         ul_lat, ul_lon = bounds.lo.lat, bounds.lo.lon
         br_lat, br_lon = bounds.hi.lat, bounds.hi.lon
@@ -69,9 +67,9 @@ class Coords:
                 sampled_coords.append(point)
         return sampled_coords
 
-    def plot(self, f_out="tmp/panos_plot.html", radius=0.3):
+    def plot(self, f_out: str = "tmp/panos_plot.html", radius: float = 0.3):
         import pydeck as pdk
-        plt_coords = [{"lat": x.lat, "lng": x.lon, "aux":x.aux} for x in self.coords]
+        plt_coords = [{"lat": x.lat, "lng": x.lon, "aux": x.aux} for x in self.coords]
         layer = pdk.Layer(
             "ScatterplotLayer",
             plt_coords,
@@ -98,7 +96,7 @@ class Coords:
         r.to_html(f_out)
         print(f"Plot generated and saved to '{f_out}'.")
     
-    def inject_idx(self):
+    def inject_idx(self) -> 'Coords':
         for i, point in enumerate(self.coords):
             point.update_aux(idx=i)
         return self
@@ -107,7 +105,7 @@ class Coords:
         if isinstance(idx, int):
             return self.coords[idx]
         elif isinstance(idx, slice):
-            return Coords(self.coords[idx])
+            return Coords(coords=self.coords[idx])
 
     def __iter__(self):
         return iter(self.coords)
@@ -116,16 +114,15 @@ class Coords:
         return len(self.coords)
 
 
-@define
-class Bounds:
-    lo: Point = field()
-    hi: Point = field()
+class Bounds(BaseModel):
+    lo: Point
+    hi: Point
 
     @classmethod
-    def from_points(cls, ul: Point, lr: Point):
-        lo = Point(min(ul.lon, lr.lon), min(ul.lat, lr.lat))
-        hi = Point(max(ul.lon, lr.lon), max(ul.lat, lr.lat))
-        return cls(lo, hi)
+    def from_points(cls, ul: Point, lr: Point) -> 'Bounds':
+        lo = Point(lon=min(ul.lon, lr.lon), lat=min(ul.lat, lr.lat))
+        hi = Point(lon=max(ul.lon, lr.lon), lat=max(ul.lat, lr.lat))
+        return cls(lo=lo, hi=hi)
 
     def get_wh(self) -> Tuple[Distance, Distance]:
         height = geopy.distance.distance(self.lo.latlon(), (self.hi.lat, self.lo.lon))
@@ -140,14 +137,16 @@ class Bounds:
             lat = self.lo.lat + (i / hcnt) * (self.hi.lat - self.lo.lat)
             for j in range(wcnt):
                 lon = self.lo.lon + (j / wcnt) * (self.hi.lon - self.lo.lon)
-                coords.append(Point(lon, lat))
+                coords.append(Point(lon=lon, lat=lat))
         return coords
 
 
 if __name__ == "__main__":
     bounds = Bounds(
-        Point(lat=37.789733, lon=-122.402614), Point(lat=37.784409, lon=-122.394974)
+        lo=Point(lat=37.789733, lon=-122.402614),
+        hi=Point(lat=37.784409, lon=-122.394974)
     )
     interval = Distance(kilometers=0.05)
     sampled = bounds.sample(interval)
     print(len(sampled))
+    assert len(sampled) == 143

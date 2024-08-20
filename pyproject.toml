@@ -1,9 +1,9 @@
 [project]
 name = "ek-geo"
-version = "0.1.2"
+version = "0.2.0"
 description = "Geographic utilities for EarthKit"
 authors = [{ name = "Jett Chen", email = "jettchen12345@gmail.com" }]
-dependencies = ["attrs>=24.2.0", "geopy>=2.4.1"]
+dependencies = ["geopy>=2.4.1", "pydantic>=2.8.2"]
 readme = "README.md"
 requires-python = ">= 3.8"
 license = "MIT"
