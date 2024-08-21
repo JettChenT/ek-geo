@@ -100,6 +100,10 @@ class Coords(BaseModel):
         for i, point in enumerate(self.coords):
             point.update_aux(idx=i)
         return self
+    
+    @classmethod
+    def new(cls, coords: List[Point]):
+        return cls(coords=coords)
 
     def __getitem__(self, idx):
         if isinstance(idx, int):

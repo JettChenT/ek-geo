@@ -1,6 +1,6 @@
 [project]
 name = "ek-geo"
-version = "0.2.0"
+version = "0.2.1"
 description = "Geographic utilities for EarthKit"
 authors = [{ name = "Jett Chen", email = "jettchen12345@gmail.com" }]
 dependencies = ["geopy>=2.4.1", "pydantic>=2.8.2"]
