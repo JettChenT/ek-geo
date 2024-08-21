@@ -5,5 +5,5 @@ b:
     rye build
 
 p:
-    rye publish
+    rye publish -y
 
